@@ -14,7 +14,7 @@ from app.schemas.job import (
 from app.schemas.result import JobResultResponse
 from app.schemas.summary import SummaryResponse
 from app.schemas.transaction import TransactionResponse
-from app.utils.s3 import delete_object, upload_fileobj
+from app.utils.s3 import upload_fileobj
 
 router = APIRouter(tags=["jobs"])
 logger = get_logger(__name__)

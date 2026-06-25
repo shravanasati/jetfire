@@ -8,7 +8,7 @@ logger = get_logger(__name__)
 
 AnomalyRule = Callable[[pd.DataFrame], pd.Series]
 
-USD_MERCHANT_BLACKLIST = frozenset({"Swiggy", "Ola", "IRCTC"})
+USD_MERCHANT_BLACKLIST = frozenset({"Swiggy", "Ola", "IRCTC", "Zomato", "Flipkart"})
 
 
 def _rule_amount_vs_median(df: pd.DataFrame) -> pd.Series:
