@@ -4,20 +4,7 @@ Transaction anomaly detection and classification service. Upload CSV transaction
 
 ## Architecture
 
-```mermaid
-graph TD
-    Client -->|POST /jobs/upload| FastAPI
-    FastAPI -->|Create Job| PostgreSQL
-    FastAPI -->|Enqueue Task| Redis
-    Redis -->|Pop Task| Celery
-    Celery -->|Read CSV| CSV
-    Celery -->|Clean| CsvCleaner
-    CsvCleaner -->|Detect| AnomalyDetector
-    AnomalyDetector -->|Classify Categories| LLM[Groq LLaMA 3.3 70B]
-    LLM -->|Generate Summary| LLM
-    LLM -->|Persist| PostgreSQL
-    PostgreSQL -->|Poll| Client
-```
+![architecture](./jetfire%20diagram.png)
 
 ### Components
 

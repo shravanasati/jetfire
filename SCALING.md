@@ -36,20 +36,18 @@ Groq API has rate limits (requests per minute, tokens per minute). Batching unca
 - Database connection pools must be sized per-replica (total connections = replicas × pool_size)
 - Recommended: 3-5 replicas initially, then auto-scale based on CPU/memory
 
-### Object Storage Instead of Local Uploads
+### Object Storage (Already Implemented)
 
-**Current**: Files saved to a local `uploads/` directory mounted as a Docker volume.
-
-**Problem**: Distributed replicas cannot share a local filesystem. Celery workers may be on different hosts.
-
-**Solution**: Use S3-compatible object storage (MinIO for self-hosted, S3 for cloud).
+Jetfire already uses MinIO (S3-compatible object storage) instead of local disk uploads.
 
 ```
 Client → FastAPI → Upload to S3 → Job record with S3 URL
   Celery Worker → Download from S3 → Process → Delete from S3
 ```
 
-**Trade-off**: Adds latency for upload + download. But enables true statelessness and horizontal scaling.
+This enables stateless FastAPI replicas and decoupled workers without shared filesystem requirements. The bucket is auto-created on startup via `ensure_bucket()`, and temp files are cleaned up in `finally` blocks within Celery tasks.
+
+**Trade-off**: Adds latency for upload + download, but is necessary for horizontal scaling.
 
 ### Read Replicas
 
@@ -201,17 +199,3 @@ Celery Worker → Internal Queue → Inference Service → Groq API
 - **LLM rate limiting**: Queue-based throttling to stay within Groq API limits
 
 **Implementation**: FastAPI middleware using `slowapi` or a Redis-based sliding window counter.
-
-### Summary of Recommendations
-
-| Area | Strategy | Effort | Impact |
-|------|----------|--------|--------|
-| API | Horizontal FastAPI replicas | Low | High |
-| Storage | S3/MinIO for uploads | Medium | High |
-| Database | Read replicas + partitioning | Medium | High |
-| Workers | Autoscaling Celery | Medium | High |
-| Queue | NATS JetStream (if Redis saturates) | High | Medium |
-| CSV | Chunked/streaming processing | Medium | Medium |
-| LLM | Caching + dedicated inference | Medium | High |
-| Observability | OpenTelemetry + Prometheus | Medium | High |
-| API Protection | Rate limiting + idempotency | Low | Medium |
